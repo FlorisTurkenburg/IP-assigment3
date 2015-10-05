@@ -5,6 +5,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include "paperserver.h"
+
+CLIENT *cl;
 
 void print_usage(char *name) {
     printf("Syntax:\n");
@@ -35,7 +38,13 @@ void remove_article(char *article) {
     return;
 }
 
-void article_info(char *article) {
+void get_article_info(char *article) {
+    struct article_info *art;
+    article_num num = atol(article);
+    art = info_1(&num, cl);
+    printf("Author: %s\tTitle: %s\n", art->author, art->title);
+
+
     return;
 }
 
@@ -44,7 +53,6 @@ int main(int argc, char **argv) {
     char *farg, *iarg, *rarg;
     char *hostname;
     int hflag = 0, aflag = 0, fflag = 0, iflag = 0, rflag = 0, lflag = 0; 
-    struct hostent *h;
 
 
     while ((c = getopt(argc, argv, "haf:i:r:l")) != -1) {
@@ -87,12 +95,14 @@ int main(int argc, char **argv) {
     }
     else {
         hostname = argv[optind];
-        h = gethostbyname(hostname);
-        if (h == NULL) {
-            fprintf(stderr, "Hostname \"%s\" could not be resolved\n", hostname);
-            exit(-2);
+        cl = clnt_create(hostname, PAPERSERVER_PROG, PAPERSERVER_VERS, "tcp");
+        if (cl == NULL) {
+            perror("Error creating RPC client!");
+            return 1;
         }
-        // printf(hostname);
+        else {
+            printf("RPC connection succeeded!\n");
+        }
     }
 
     if (aflag == 1) {
@@ -117,7 +127,7 @@ int main(int argc, char **argv) {
 
     if (iflag == 1) {
         printf("iarg: %s\n", iarg);
-        article_info(iarg);
+        get_article_info(iarg);
     }
 
     printf("optind: %d\n", optind);
@@ -127,7 +137,7 @@ int main(int argc, char **argv) {
     }
     printf("\n");
 
-
+    clnt_destroy(cl);
 
 
     return 0;
