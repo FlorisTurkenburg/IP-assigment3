@@ -27,6 +27,19 @@ void print_usage(char *name) {
 }
 
 void add_article(char *author, char *title, char *filename) {
+    struct add_article_in *in;
+    article_num *num;
+
+    in = (struct add_article_in *) malloc(sizeof(struct add_article_in));
+
+    in->author = strdup(author);
+    in->title = strdup(title);
+    in->file_name = strdup(filename);
+
+    num = add_1(in, cl);
+    printf("%ld\n", *num);
+    free(in);
+
     return;
 }
 
@@ -39,8 +52,11 @@ void remove_article(char *article) {
 }
 
 void get_article_info(char *article) {
-    struct article_info *art;
+    struct article_info_out *art;
     article_num num = atol(article);
+
+    art = (struct article_info_out *) malloc(sizeof(struct article_info_out));
+
     art = info_1(&num, cl);
     printf("Author: %s\tTitle: %s\n", art->author, art->title);
 
