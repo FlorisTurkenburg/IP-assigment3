@@ -11,7 +11,7 @@ CLIENT *cl;
 
 void print_usage(char *name) {
     printf("Syntax:\n");
-    printf("\t%s <hostname> -a \'<Author Name>\' \'<Paper title>\' <file>\n", name);
+    printf("\t%s <hostname> -a \'<Author Name>\' \'<Paper Title>\' <file>\n", name);
     printf("\t\tAdd an article\n\n");
     printf("\t%s <hostname> -f <document number>\n", name);
     printf("\t\tFetch an article\n\n");
@@ -20,6 +20,7 @@ void print_usage(char *name) {
     printf("\t%s <hostname> -r <document number>\n", name);
     printf("\t\tRemove an article\n\n");
     printf("\t%s <hostname> -l \n", name);
+    printf("\t\tList all stored articles\n\n");
     printf("\t%s [-h]\n", name);
     printf("\t\tPrint usage syntax\n\n");
 
@@ -63,7 +64,7 @@ void get_article_info(char *article) {
     art = (struct article_info_out *) malloc(sizeof(struct article_info_out));
 
     art = info_1(&num, cl);
-    printf("Author: %s\tTitle: %s\n", art->author, art->title);
+    printf("%s\t%s\n", art->author, art->title);
 
 
     return;
@@ -122,6 +123,7 @@ int main(int argc, char **argv) {
 
     if (hflag == 1 || argc < 2) {
         print_usage(argv[0]);
+        exit(1);
     }
 
     if ((argc - optind) < 1) {
