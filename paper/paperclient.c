@@ -48,7 +48,12 @@ void fetch_article(char *article) {
 }
 
 void remove_article(char *article) {
-    return;
+    article_num num = atol(article);
+    int *ret_val;
+
+    ret_val = remove_1(&num, cl);
+
+    return ;
 }
 
 void get_article_info(char *article) {
@@ -63,6 +68,21 @@ void get_article_info(char *article) {
 
     return;
 }
+
+void get_article_list() {
+    struct list_article_out *article;
+
+    article = list_1(NULL, cl);
+
+    while (article) {
+        printf("%ld\t%s\t%s\n", article->num, article->author, article->title);
+        article = article->next;
+    }
+
+    return;
+
+}
+
 
 int main(int argc, char **argv) {
     int c, err;
@@ -132,26 +152,30 @@ int main(int argc, char **argv) {
     }
 
     if (fflag == 1) {
-        printf("farg: %s\n", farg);
+        // printf("farg: %s\n", farg);
         fetch_article(farg);
     }
 
     if (rflag == 1) {
-        printf("rarg: %s\n", rarg);
+        // printf("rarg: %s\n", rarg);
         remove_article(rarg);
     }
 
     if (iflag == 1) {
-        printf("iarg: %s\n", iarg);
+        // printf("iarg: %s\n", iarg);
         get_article_info(iarg);
     }
 
-    printf("optind: %d\n", optind);
-    int i;
-    for (i = 0; i < argc; i++) {
-        printf("%s ", argv[i]);
+    if (lflag == 1) {
+        get_article_list();
     }
-    printf("\n");
+
+    // printf("optind: %d\n", optind);
+    // int i;
+    // for (i = 0; i < argc; i++) {
+    //     printf("%s ", argv[i]);
+    // }
+    // printf("\n");
 
     clnt_destroy(cl);
 

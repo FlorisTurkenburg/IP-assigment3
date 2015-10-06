@@ -9,12 +9,13 @@ article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
     struct list_article_out *cur_paper;
     struct list_article_out *new_paper;
     new_paper = (struct list_article_out *) malloc(sizeof(struct list_article_out));
+    
+    new_paper->author = strdup(in->author);
+    new_paper->title = strdup(in->title);
 
     if (first_paper == NULL) { // Add the very first paper to the list
         new_paper->num = 1;
         out = 1;
-        new_paper->author = strdup(in->author);
-        new_paper->title = strdup(in->title);
         // printf("in_author%s\tin_title%s\n", in->author, in->title);
         // printf("paper_author%s\tpaper_title%s\n", paper->author, paper->title);
         new_paper->next = NULL;
@@ -26,6 +27,11 @@ article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
         article_num first_free = 0;
         int look_for_free = 1;
         cur_paper = first_paper;
+
+        if (first_paper->num > 1) {
+            first_free = 1;
+            look_for_free = 0;
+        }
         while (cur_paper) {
             if (look_for_free == 1) {
                 if (cur_paper->next != NULL) {
@@ -41,7 +47,7 @@ article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
             if (strcmp(cur_paper->author, strdup(in->author)) == 0 && strcmp(cur_paper->title, strdup(in->title)) == 0) {
                 // Paper already exists, update and return number
                 out = cur_paper->num;
-                // free(new_paper);
+                free(new_paper);
                 return &out;
             }
             else { // Continue looking if paper exists
@@ -57,22 +63,28 @@ article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
             // No free number was found so add the paper at the end
             new_paper->num = cur_paper->num + 1;
             out = new_paper->num;
-            new_paper->author = strdup(in->author);
-            new_paper->title = strdup(in->title);
             new_paper->next = NULL;
             cur_paper->next = new_paper;
         }
         else { // Place the new paper at the free number
-            cur_paper = first_paper;
-            while (cur_paper) {
-                if (cur_paper->num == (first_free - 1)) {
-                    new_paper->author = strdup(in->author);
-                    new_paper->title = strdup(in->title);
-                    new_paper->num = first_free;
-                    new_paper->next = cur_paper->next;
-                    cur_paper->next = new_paper;
-                    out = first_free;
-                    break;
+            if (first_free == 1) { // If number 1 is available, place the paper
+                                   // at the start of the list.
+                new_paper->num = 1;
+                new_paper->next = first_paper;
+                first_paper = new_paper;
+                out = 1;
+
+            }
+            else {
+                cur_paper = first_paper;
+                while (cur_paper) {
+                    if (cur_paper->num == (first_free - 1)) {
+                        new_paper->num = first_free;
+                        new_paper->next = cur_paper->next;
+                        cur_paper->next = new_paper;
+                        out = first_free;
+                        break;
+                    }
                 }
             }
             
@@ -89,13 +101,10 @@ article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
 
 
 list_article_out *list_1_svc(void * not_used, struct svc_req *rqstp) {
-    static list_article_out article_list;
-    article_list.num = 1;
-    article_list.author = "Henk";
-    article_list.title = "Some Title";
-    article_list.next = NULL;
+    static struct list_article_out *article_list;
+    article_list = first_paper;
 
-    return &article_list;
+    return article_list;
         
 }   
 
@@ -126,7 +135,36 @@ article_info_out *info_1_svc(article_num *num, struct svc_req *reqstp) {
 
 int *remove_1_svc(article_num *num, struct svc_req *rqstp) {
     static int ret_val;
-    ret_val = 1;
+    
+    struct list_article_out *cur_paper;
+    struct list_article_out *temp_paper;
+
+    ret_val = 0;
+    cur_paper = first_paper;
+    if (first_paper->num == *num) { 
+        // In case the first paper in the list must be removed, assign the next
+        // as the start of the list and remove the paper. 
+                                
+        first_paper = first_paper->next;
+        free(cur_paper);
+        ret_val = 1;
+        return &ret_val;
+    }
+    // Search for the correct paper, if found, link its predecessor and 
+    // successor together and remove the paper.
+    while (cur_paper) {
+        temp_paper = cur_paper->next;
+        if (temp_paper->num == *num) {
+            cur_paper->next = temp_paper->next;
+            free(temp_paper);
+            ret_val = 1;
+            break;
+        }
+        else {
+            cur_paper = cur_paper->next;
+        }
+    }
+
 
     return &ret_val;
 
