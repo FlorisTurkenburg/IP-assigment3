@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/stat.h>
 #include "paperserver.h"
 
 CLIENT *cl;
@@ -31,20 +32,61 @@ void add_article(char *author, char *title, char *filename) {
     struct add_article_in *in;
     article_num *num;
 
+    FILE *fp;
+    struct stat file_stat;
+
+    fp = fopen(filename, "rb");
+    if (fp == NULL) {
+        perror("Error when opening file");
+        return;
+    }
+
+    stat(filename, &file_stat);
+
     in = (struct add_article_in *) malloc(sizeof(struct add_article_in));
 
     in->author = strdup(author);
     in->title = strdup(title);
-    in->file_name = strdup(filename);
+
+    in->content.content_val = malloc(sizeof(char) * file_stat.st_size);
+    in->content.content_len = fread(in->content.content_val, 1, file_stat.st_size, fp);
+    if (in->content.content_len == 0) {
+        perror("Error while reading");
+        fclose(fp);
+        exit(1);
+    }
+
+    fclose(fp);
+    
+
 
     num = add_1(in, cl);
     printf("%ld\n", *num);
+    free(in->content.content_val);
     free(in);
 
     return;
 }
 
 void fetch_article(char *article) {
+    struct fetch_article_out *article_content;
+
+    article_content = (struct fetch_article_out *) malloc(sizeof(struct fetch_article_out));
+
+    article_num num = atol(article);
+    
+    article_content = fetch_1(&num, cl);
+
+    if (article_content != NULL) {
+        int i;
+        for (i = 0; i < article_content->content.content_len; i++) {
+            printf("%c", article_content->content.content_val[i]);
+        }
+    }
+
+    // free(article_content->content.content_val);
+    // free(article_content);
+
     return;
 }
 
@@ -64,7 +106,10 @@ void get_article_info(char *article) {
     art = (struct article_info_out *) malloc(sizeof(struct article_info_out));
 
     art = info_1(&num, cl);
-    printf("%s\t%s\n", art->author, art->title);
+    if (art) {
+        printf("%s\t%s\n", art->author, art->title);
+        
+    }
 
 
     return;
@@ -138,9 +183,9 @@ int main(int argc, char **argv) {
             perror("Error creating RPC client!");
             return 1;
         }
-        else {
-            printf("RPC connection succeeded!\n");
-        }
+        // else {
+        //     printf("RPC connection succeeded!\n");
+        // }
     }
 
     if (aflag == 1) {

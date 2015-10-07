@@ -1,8 +1,16 @@
 #!/bin/sh
-./paperclient localhost -a 'First author' 'First title' paper1.pdf
-./paperclient localhost -a 'Second author' 'Second title' paper2.pdf
-./paperclient localhost -a 'Third author' 'Third title' paper3.pdf
-./paperclient localhost -a 'Fourth author' 'Fourth title' paper4.pdf
-./paperclient localhost -a 'Fifth author' 'Fifth title' paper5.pdf
-./paperclient localhost -a 'Sixth author' 'Sixth title' paper6.pdf
+./paperclient localhost -a 'Manolis' 'UNIX Multiprocessing' assignment-1.pdf
+./paperclient localhost -a 'Spyros Voulgaris' 'Sockets' assignment-2.pdf
+./paperclient localhost -a 'Spyros Voulgaris' 'RPC' assignment-3.pdf
+./paperclient localhost -a 'Patricia Lago' 'Project Template SOD' ProjectTemplate-SOD15.docx
 ./paperclient localhost -l
+
+echo "Performing md5sum checks:"
+md5sum assignment-1.pdf
+./paperclient localhost -f 1 | md5sum
+md5sum assignment-2.pdf
+./paperclient localhost -f 2 | md5sum
+md5sum assignment-3.pdf
+./paperclient localhost -f 3 | md5sum
+md5sum ProjectTemplate-SOD15.docx
+./paperclient localhost -f 4 | md5sum

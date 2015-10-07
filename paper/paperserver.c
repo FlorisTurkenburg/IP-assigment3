@@ -1,18 +1,21 @@
 #include "paperserver.h"
 
 // The head of the linked list of papers.
-struct list_article_out *first_paper = NULL; 
+struct articles *first_paper = NULL; 
 
 
 article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
     static article_num out;
-    struct list_article_out *cur_paper;
-    struct list_article_out *new_paper;
-    struct list_article_out *free_number_predecessor;
-    new_paper = (struct list_article_out *) malloc(sizeof(struct list_article_out));
+    struct articles *cur_paper;
+    struct articles *new_paper;
+    struct articles *free_number_predecessor;
+    new_paper = (struct articles *) malloc(sizeof(struct articles));
     
     new_paper->author = strdup(in->author);
     new_paper->title = strdup(in->title);
+    new_paper->content.content_len = in->content.content_len;
+    new_paper->content.content_val = malloc(in->content.content_len * sizeof(char));
+    memcpy(new_paper->content.content_val, in->content.content_val, in->content.content_len * sizeof(char));
 
     if (first_paper == NULL) { // Add the very first paper to the list
         new_paper->num = 1;
@@ -39,6 +42,9 @@ article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
             // printf("curpaper_author %s\tcurpaper_title %s\n", cur_paper->author, cur_paper->title);
             if (strcmp(cur_paper->author, strdup(in->author)) == 0 && strcmp(cur_paper->title, strdup(in->title)) == 0) {
                 // Paper already exists, update and return number
+                cur_paper->content.content_len = in->content.content_len;
+                cur_paper->content.content_val = realloc(cur_paper->content.content_val, in->content.content_len * sizeof(char));
+                memcpy(cur_paper->content.content_val, in->content.content_val, in->content.content_len * sizeof(char)); 
                 out = cur_paper->num;
                 free(new_paper);
                 return &out;
@@ -109,18 +115,43 @@ article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
 
 
 list_article_out *list_1_svc(void * not_used, struct svc_req *rqstp) {
-    static struct list_article_out *article_list;
-    article_list = first_paper;
+    static struct list_article_out *article_list_start;
+    struct list_article_out *cur_out_article;
+    struct articles *paper = first_paper;
 
-    return article_list;
+    if (paper == NULL) {
+        article_list_start = NULL;
+        return article_list_start;
+    }
+
+    article_list_start = (struct list_article_out*) malloc(sizeof(struct list_article_out));
+    cur_out_article = article_list_start;
+
+    while (paper) {
+        cur_out_article->num = paper->num;
+        cur_out_article->author = strdup(paper->author);
+        cur_out_article->title = strdup(paper->title);
+
+        if (paper->next) {
+            cur_out_article->next = (struct list_article_out *) malloc(sizeof(struct list_article_out));
+            cur_out_article = cur_out_article->next;
+            paper = paper->next;
+        }
+        else {
+            cur_out_article->next = NULL;
+            break;
+        }
+    }
+
+    return article_list_start;
         
 }   
 
 
 article_info_out *info_1_svc(article_num *num, struct svc_req *reqstp) {
     static article_info_out *article;
-    struct list_article_out *paper;
-    //paper = (struct list_article_out *) malloc(sizeof(struct list_article_out));
+    struct articles *paper;
+    //paper = (struct articles *) malloc(sizeof(struct articles));
     article = (struct article_info_out *) malloc(sizeof(struct article_info_out));
 
     // printf("firstpaper_author %s\tfirstpaper_title %s\n", first_paper->author, first_paper->title);
@@ -134,7 +165,13 @@ article_info_out *info_1_svc(article_num *num, struct svc_req *reqstp) {
             break;
         }
         else {
-            paper = paper->next;
+            if (paper->next) {
+                paper = paper->next;
+            }
+            else {
+                article = NULL;
+                break;
+            }
         }
     }
 
@@ -144,8 +181,8 @@ article_info_out *info_1_svc(article_num *num, struct svc_req *reqstp) {
 int *remove_1_svc(article_num *num, struct svc_req *rqstp) {
     static int ret_val;
     
-    struct list_article_out *cur_paper;
-    struct list_article_out *temp_paper;
+    struct articles *cur_paper;
+    struct articles *temp_paper;
 
     ret_val = 0;
     if (first_paper) {
@@ -168,6 +205,7 @@ int *remove_1_svc(article_num *num, struct svc_req *rqstp) {
                 printf("temp_paper num: %ld \n", temp_paper->num);
                 if (temp_paper->num == *num) {
                     cur_paper->next = temp_paper->next;
+                    free(temp_paper->content.content_val);
                     free(temp_paper);
                     ret_val = 1;
                     break;
@@ -186,5 +224,37 @@ int *remove_1_svc(article_num *num, struct svc_req *rqstp) {
 
     // Return value is not used.
     return &ret_val;
+
+}
+
+fetch_article_out *fetch_1_svc(article_num *num, struct svc_req *rqstp) {
+    static struct fetch_article_out *article;
+    struct articles *paper = first_paper;
+
+    article = (struct fetch_article_out *) malloc(sizeof(struct fetch_article_out));
+
+
+    while (paper != NULL) {
+        if (paper->num == *num) {
+            article->content.content_len = paper->content.content_len;
+            article->content.content_val = malloc(paper->content.content_len * sizeof(char));
+            memcpy(article->content.content_val, paper->content.content_val, paper->content.content_len * sizeof(char));
+            
+            return article;
+        }
+        else {
+            if (paper->next != NULL) {
+                paper = paper->next;
+            }
+            else {
+                break;
+            }
+        }
+    }
+    article->content.content_len = 0;
+    article->content.content_val = NULL;
+
+    return article;
+
 
 }
