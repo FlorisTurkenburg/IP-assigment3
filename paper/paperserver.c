@@ -1,3 +1,4 @@
+#include <rpc/rpc.h>
 #include "paperserver.h"
 
 // The head of the linked list of papers.
@@ -13,15 +14,19 @@ article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
     
     new_paper->author = strdup(in->author);
     new_paper->title = strdup(in->title);
-    new_paper->content.content_len = in->content.content_len;
-    new_paper->content.content_val = malloc(in->content.content_len * sizeof(char));
-    memcpy(new_paper->content.content_val, in->content.content_val, in->content.content_len * sizeof(char));
+    // new_paper->content.content_len = in->content.content_len;
+    // new_paper->content.content_val = malloc(in->content.content_len * sizeof(char));
+    // memcpy(new_paper->content.content_val, in->content.content_val, in->content.content_len * sizeof(char));
 
     if (first_paper == NULL) { // Add the very first paper to the list
-        new_paper->num = 1;
-        out = 1;
+        new_paper->num = 0;
+        out = 0;
+
         // printf("in_author%s\tin_title%s\n", in->author, in->title);
         // printf("paper_author%s\tpaper_title%s\n", paper->author, paper->title);
+        new_paper->content.content_len = in->content.content_len;
+        new_paper->content.content_val = malloc(in->content.content_len * sizeof(char));
+        memcpy(new_paper->content.content_val, in->content.content_val, in->content.content_len * sizeof(char));
         new_paper->next = NULL;
         first_paper = new_paper;
         // free(new_paper);
@@ -32,8 +37,8 @@ article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
         int look_for_free = 1;
         cur_paper = first_paper;
 
-        if (first_paper->num > 1) {
-            first_free = 1;
+        if (first_paper->num > 0) {
+            first_free = 0;
             look_for_free = 0;
         }
         while (cur_paper) {
@@ -46,7 +51,7 @@ article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
                 cur_paper->content.content_val = realloc(cur_paper->content.content_val, in->content.content_len * sizeof(char));
                 memcpy(cur_paper->content.content_val, in->content.content_val, in->content.content_len * sizeof(char)); 
                 out = cur_paper->num;
-                free(new_paper);
+                // xdr_free((xdrproc_t)xdr_articles, (char *)new_paper);
                 return &out;
             }
             else { // Continue looking if paper exists
@@ -73,21 +78,30 @@ article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
         if (look_for_free == 1) { 
             // No free number was found so add the paper at the end
             new_paper->num = cur_paper->num + 1;
+            new_paper->content.content_len = in->content.content_len;
+            new_paper->content.content_val = malloc(in->content.content_len * sizeof(char));
+            memcpy(new_paper->content.content_val, in->content.content_val, in->content.content_len * sizeof(char));
             out = new_paper->num;
             new_paper->next = NULL;
             cur_paper->next = new_paper;
         }
         else { // Place the new paper at the free number
-            if (first_free == 1) { // If number 1 is available, place the paper
+            if (first_free == 0) { // If number 1 is available, place the paper
                                    // at the start of the list.
-                new_paper->num = 1;
+                new_paper->num = first_free;
+                new_paper->content.content_len = in->content.content_len;
+                new_paper->content.content_val = malloc(in->content.content_len * sizeof(char));
+                memcpy(new_paper->content.content_val, in->content.content_val, in->content.content_len * sizeof(char));
                 new_paper->next = first_paper;
                 first_paper = new_paper;
-                out = 1;
+                out = first_paper->num;
 
             }
             else {
                 new_paper->num = first_free;
+                new_paper->content.content_len = in->content.content_len;
+                new_paper->content.content_val = malloc(in->content.content_len * sizeof(char));
+                memcpy(new_paper->content.content_val, in->content.content_val, in->content.content_len * sizeof(char));
                 new_paper->next = free_number_predecessor->next;
                 free_number_predecessor->next = new_paper;
                 out = first_free;
@@ -114,14 +128,20 @@ article_num *add_1_svc(add_article_in *in, struct svc_req *rqstp) {
 }
 
 
-list_article_out *list_1_svc(void * not_used, struct svc_req *rqstp) {
+list_res *list_1_svc(void * not_used, struct svc_req *rqstp) {
+    static list_res result;
     static struct list_article_out *article_list_start;
+
     struct list_article_out *cur_out_article;
     struct articles *paper = first_paper;
 
+    // xdr_free(xdr_list_article_out, article_list_start);
+    xdr_free((xdrproc_t)xdr_list_res, (char *)&result);
+
     if (paper == NULL) {
-        article_list_start = NULL;
-        return article_list_start;
+        // article_list_start = NULL;
+        result.err = 1;
+        return &result;
     }
 
     article_list_start = (struct list_article_out*) malloc(sizeof(struct list_article_out));
@@ -142,15 +162,22 @@ list_article_out *list_1_svc(void * not_used, struct svc_req *rqstp) {
             break;
         }
     }
+    result.err = 0;
+    result.list_res_u.list = *article_list_start;
 
-    return article_list_start;
+    // return article_list_start;
         
+    return &result;
 }   
 
 
-article_info_out *info_1_svc(article_num *num, struct svc_req *reqstp) {
+info_res *info_1_svc(article_num *num, struct svc_req *reqstp) {
+    static info_res result;
     static article_info_out *article;
     struct articles *paper;
+
+    xdr_free((xdrproc_t)xdr_info_res, (char *)&result);
+    // xdr_free(xdr_article_info_out, article);
     //paper = (struct articles *) malloc(sizeof(struct articles));
     article = (struct article_info_out *) malloc(sizeof(struct article_info_out));
 
@@ -162,20 +189,26 @@ article_info_out *info_1_svc(article_num *num, struct svc_req *reqstp) {
         if (paper->num == *num) {
             article->author = strdup(paper->author);
             article->title = strdup(paper->title);
-            break;
+            result.err = 0;
+            result.info_res_u.info = *article;
+            return &result;
+            // break;
         }
         else {
             if (paper->next) {
                 paper = paper->next;
             }
             else {
-                article = NULL;
+                //article = NULL;
                 break;
             }
         }
     }
+    result.err = 1;
 
-    return article;   
+    // return article;   
+    // return &result;   
+    return NULL;
 }   
 
 int *remove_1_svc(article_num *num, struct svc_req *rqstp) {
@@ -193,7 +226,7 @@ int *remove_1_svc(article_num *num, struct svc_req *rqstp) {
             printf("remove first paper\n");
                                     
             first_paper = first_paper->next;
-            free(cur_paper);
+            // xdr_free((xdrproc_t)xdr_articles, (char *)cur_paper);
             ret_val = 1;
             return &ret_val;
         }
@@ -205,8 +238,8 @@ int *remove_1_svc(article_num *num, struct svc_req *rqstp) {
                 printf("temp_paper num: %ld \n", temp_paper->num);
                 if (temp_paper->num == *num) {
                     cur_paper->next = temp_paper->next;
-                    free(temp_paper->content.content_val);
-                    free(temp_paper);
+                    //free(temp_paper->content.content_val);
+                    // xdr_free((xdrproc_t)xdr_articles, (char *)temp_paper);
                     ret_val = 1;
                     break;
                 }
@@ -230,6 +263,7 @@ int *remove_1_svc(article_num *num, struct svc_req *rqstp) {
 fetch_article_out *fetch_1_svc(article_num *num, struct svc_req *rqstp) {
     static struct fetch_article_out *article;
     struct articles *paper = first_paper;
+    // xdr_free((xdrproc_t)xdr_fetch_article_out, (char *)article);
 
     article = (struct fetch_article_out *) malloc(sizeof(struct fetch_article_out));
 

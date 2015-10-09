@@ -100,29 +100,47 @@ void remove_article(char *article) {
 }
 
 void get_article_info(char *article) {
-    struct article_info_out *art;
+    struct article_info_out art;
+    info_res *result;
     article_num num = atol(article);
 
-    art = (struct article_info_out *) malloc(sizeof(struct article_info_out));
+    // art = (struct article_info_out *) malloc(sizeof(struct article_info_out));
 
-    art = info_1(&num, cl);
-    if (art) {
-        printf("%s\t%s\n", art->author, art->title);
+    result = info_1(&num, cl);
+
+    if (result == NULL) {
+        perror("Error while calling server");
+        return;
+    }
+
+    if (result->err == 0) {
+        art = result->info_res_u.info;
+        printf("%s\t%s\n", art.author, art.title);
         
     }
 
+    // free(art);
 
     return;
 }
 
 void get_article_list() {
     struct list_article_out *article;
+    list_res *result;
 
-    article = list_1(NULL, cl);
+    // article = list_1(NULL, cl);
+    result = list_1(NULL, cl);
+    if (result == NULL) {
+        perror("Error while calling server");
+        return;
+    }
 
-    while (article) {
-        printf("%ld\t%s\t%s\n", article->num, article->author, article->title);
-        article = article->next;
+    if (result->err == 0) {
+        article = &result->list_res_u.list;
+        while (article) {
+            printf("%ld\t%s\t%s\n", article->num, article->author, article->title);
+            article = article->next;
+        }
     }
 
     return;
@@ -181,7 +199,7 @@ int main(int argc, char **argv) {
         cl = clnt_create(hostname, PAPERSERVER_PROG, PAPERSERVER_VERS, "tcp");
         if (cl == NULL) {
             perror("Error creating RPC client!");
-            return 1;
+            exit(1);
         }
         // else {
         //     printf("RPC connection succeeded!\n");
@@ -217,12 +235,6 @@ int main(int argc, char **argv) {
         get_article_list();
     }
 
-    // printf("optind: %d\n", optind);
-    // int i;
-    // for (i = 0; i < argc; i++) {
-    //     printf("%s ", argv[i]);
-    // }
-    // printf("\n");
 
     clnt_destroy(cl);
 
