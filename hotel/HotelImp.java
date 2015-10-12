@@ -6,7 +6,7 @@ public class HotelImp extends java.rmi.server.UnicastRemoteObject implements Hot
     private int type2num = 20;
     private int type3num = 20;
 
-    private ArrayList<Booking> bookings;
+    private ArrayList<Booking> bookings = new ArrayList<Booking>();
 
     private String HELPMESSAGE = "";
 
@@ -27,10 +27,13 @@ public class HotelImp extends java.rmi.server.UnicastRemoteObject implements Hot
         switch (type){
             case 1:
                 type1num--;
+                break;
             case 2:
                 type2num--;
+                break;
             case 3:
                 type3num--;
+                break;
             default: System.exit(1);
         }
         this.bookings.add(new Booking(type, name));
