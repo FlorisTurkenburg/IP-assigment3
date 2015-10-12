@@ -33,3 +33,6 @@
 
 # Mac OS X
 .DS_STORE
+
+# Java
+*.class
