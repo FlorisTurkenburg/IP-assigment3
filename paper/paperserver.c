@@ -192,7 +192,6 @@ info_res *info_1_svc(article_num *num, struct svc_req *reqstp) {
             result.err = 0;
             result.info_res_u.info = *article;
             return &result;
-            // break;
         }
         else {
             if (paper->next) {
