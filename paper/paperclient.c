@@ -45,8 +45,10 @@ void add_article(char *author, char *title, char *filename) {
 
     in = (struct add_article_in *) malloc(sizeof(struct add_article_in));
 
-    in->author = strdup(author);
-    in->title = strdup(title);
+    // in->author = strdup(author);
+    in->author = author;
+    // in->title = strdup(title);
+    in->title = title;
 
     in->content.content_val = malloc(sizeof(char) * file_stat.st_size);
     in->content.content_len = fread(in->content.content_val, 1, file_stat.st_size, fp);
@@ -71,8 +73,6 @@ void add_article(char *author, char *title, char *filename) {
 void fetch_article(char *article) {
     struct fetch_article_out *article_content;
 
-    article_content = (struct fetch_article_out *) malloc(sizeof(struct fetch_article_out));
-
     article_num num = atol(article);
     
     article_content = fetch_1(&num, cl);
@@ -84,8 +84,6 @@ void fetch_article(char *article) {
         }
     }
 
-    // free(article_content->content.content_val);
-    // free(article_content);
 
     return;
 }
@@ -104,7 +102,6 @@ void get_article_info(char *article) {
     info_res *result;
     article_num num = atol(article);
 
-    // art = (struct article_info_out *) malloc(sizeof(struct article_info_out));
 
     result = info_1(&num, cl);
 
@@ -119,7 +116,6 @@ void get_article_info(char *article) {
         
     }
 
-    // free(art);
 
     return;
 }

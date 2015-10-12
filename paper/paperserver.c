@@ -206,9 +206,7 @@ info_res *info_1_svc(article_num *num, struct svc_req *reqstp) {
     }
     result.err = 1;
 
-    // return article;   
-    // return &result;   
-    return NULL;
+    return &result;
 }   
 
 int *remove_1_svc(article_num *num, struct svc_req *rqstp) {
@@ -223,7 +221,6 @@ int *remove_1_svc(article_num *num, struct svc_req *rqstp) {
         if (first_paper->num == *num) { 
             // In case the first paper in the list must be removed, assign the next
             // as the start of the list and remove the paper. 
-            printf("remove first paper\n");
                                     
             first_paper = first_paper->next;
             // xdr_free((xdrproc_t)xdr_articles, (char *)cur_paper);
@@ -235,7 +232,6 @@ int *remove_1_svc(article_num *num, struct svc_req *rqstp) {
         while (cur_paper) {
             temp_paper = cur_paper->next;
             if (temp_paper) {
-                printf("temp_paper num: %ld \n", temp_paper->num);
                 if (temp_paper->num == *num) {
                     cur_paper->next = temp_paper->next;
                     //free(temp_paper->content.content_val);
