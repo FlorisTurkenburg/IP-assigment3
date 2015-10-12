@@ -5,8 +5,8 @@ public class HotelClient {
         try
         {
             Hotel c = (Hotel) Naming.lookup("rmi://localhost/HotelService");
-            c.bookRoom(0,"Foo");
-            String [] guests = c.listGuests();
+            c.bookRoom(1,"Foo");
+            //String [] guests = c.listGuests();
         }
         catch (Exception e) {
             e.printStackTrace();
