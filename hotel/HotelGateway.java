@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class HotelGateway {
 
     final static int PORTNUM = 3333;
-    final static String HELP_MESSAGE = "For help, use -h flag.\nTo list available rooms: <hostname> -l\nTo book a room: <hostname> -b <type> <name>\nTo list guests: <hostname> -g";
+    final static String HELP_MESSAGE = "For help: h\nTo list available rooms: l\nTo book a room: b <type> <name>\nTo list guests: g";
 
     public static void main(String args[]) {
         try {
@@ -65,6 +65,7 @@ public class HotelGateway {
                                     }
                                 } else if (input.equals("q")) {
                                     pw.println("$");
+                                    clientSocket.close();
                                     return;
                                 } else {
                                     pw.println(HELP_MESSAGE);
