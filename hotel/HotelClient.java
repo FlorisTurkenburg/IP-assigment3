@@ -5,13 +5,14 @@ import gnu.getopt.Getopt;
 public class HotelClient {
     public static void main(String args[]) {
         try {
-            Hotel hotel = (Hotel) Naming.lookup("rmi://localhost/HotelService");
+
             String HELP_MESSAGE = "For help, use -h flag.\nTo list available rooms: <hostname> -l\nTo book a room: <hostname> -b <type> <name>\nTo list guests: <hostname> -g";
 
             if (args.length < 2) {
                 System.out.println(HELP_MESSAGE);
                 return;
             }
+            Hotel hotel = (Hotel) Naming.lookup("rmi://"+args[0]+"/HotelService");
             Getopt g = new Getopt("HotelProg", args, "hlb:g");
             //
             int c;
