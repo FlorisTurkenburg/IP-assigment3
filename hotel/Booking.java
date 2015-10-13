@@ -1,3 +1,4 @@
+
 /**
  * Class representing booking of a hotel room
  * type: 1, 2, or 3

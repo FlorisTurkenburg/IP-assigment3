@@ -1,3 +1,4 @@
+
 import java.rmi.Naming;
 
 public class HotelServer {

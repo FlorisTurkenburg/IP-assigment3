@@ -1,4 +1,6 @@
+
 import java.util.ArrayList;
+import gnu.getopt.Getopt;
 
 public class HotelImp extends java.rmi.server.UnicastRemoteObject implements Hotel {
 
@@ -23,28 +25,40 @@ public class HotelImp extends java.rmi.server.UnicastRemoteObject implements Hot
     }
 
     @Override
-    public synchronized void bookRoom(int type, String name) throws java.rmi.RemoteException {
+    public synchronized int bookRoom(int type, String name) throws java.rmi.RemoteException {
+        System.out.println("inside bookRoom. type: "+type+" name: "+name);
         switch (type){
             case 1:
+                if(type1num == 0){
+                    return -1;
+                }
                 type1num--;
                 break;
             case 2:
+                if(type2num == 0){
+                    return -1;
+                }
                 type2num--;
                 break;
             case 3:
+                if(type3num == 0){
+                    return -1;
+                }
                 type3num--;
                 break;
             default: System.exit(1);
         }
         this.bookings.add(new Booking(type, name));
+        return 0;
     }
 
     @Override
     public synchronized String[] listGuests() throws java.rmi.RemoteException {
+        System.out.println("inside listguests.");
         ArrayList<String> arr = new ArrayList<String>();
         for (int i=0; i<this.bookings.size(); i++){
             arr.add(this.bookings.get(i).getName());
         }
-        return (String[]) arr.toArray();
+        return arr.toArray(new String[arr.size()]);
     }
 }
