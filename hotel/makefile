@@ -13,6 +13,7 @@ CLASSES = \
 		HotelClient.java \
 		HotelImp.java \
 		HotelServer.java \
+		HotelGateway.java \
 
 javaprograms: $(CLASSES:.java=.class)
 
