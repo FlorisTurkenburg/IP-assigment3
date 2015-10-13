@@ -26,7 +26,6 @@ public class HotelImp extends java.rmi.server.UnicastRemoteObject implements Hot
 
     @Override
     public synchronized int bookRoom(int type, String name) throws java.rmi.RemoteException {
-        System.out.println("inside bookRoom. type: "+type+" name: "+name);
         switch (type){
             case 1:
                 if(type1num == 0){
@@ -54,7 +53,6 @@ public class HotelImp extends java.rmi.server.UnicastRemoteObject implements Hot
 
     @Override
     public synchronized String[] listGuests() throws java.rmi.RemoteException {
-        System.out.println("inside listguests.");
         ArrayList<String> arr = new ArrayList<String>();
         for (int i=0; i<this.bookings.size(); i++){
             arr.add(this.bookings.get(i).getName());
