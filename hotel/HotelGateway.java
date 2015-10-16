@@ -25,7 +25,6 @@ public class HotelGateway {
                 final HotelInterface hotel = (HotelInterface) Naming.lookup("rmi://localhost/HotelService");
                 Runnable task = new Runnable() {
                     public void run() {
-                        System.out.println("inside runnable");
                         try {
                             BufferedReader br = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                             PrintWriter pw = new PrintWriter(clientSocket.getOutputStream(), true);
