@@ -12,7 +12,7 @@ public class HotelClient {
                 System.out.println(HELP_MESSAGE);
                 return;
             }
-            Hotel hotel = (Hotel) Naming.lookup("rmi://"+args[0]+"/HotelService");
+            HotelInterface hotel = (HotelInterface) Naming.lookup("rmi://"+args[0]+"/HotelService");
             Getopt g = new Getopt("HotelProg", args, "hlb:g");
             //
             int c;

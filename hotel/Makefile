@@ -9,7 +9,7 @@ build: clean javaprograms
 
 CLASSES = \
 		Booking.java \
-		Hotel.java \
+		HotelInterface.java \
 		HotelClient.java \
 		HotelImp.java \
 		HotelServer.java \

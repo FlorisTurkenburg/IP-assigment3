@@ -2,7 +2,7 @@
 import java.util.ArrayList;
 import gnu.getopt.Getopt;
 
-public class HotelImp extends java.rmi.server.UnicastRemoteObject implements Hotel {
+public class HotelImp extends java.rmi.server.UnicastRemoteObject implements HotelInterface {
 
     private int type1num = 10;
     private int type2num = 20;
