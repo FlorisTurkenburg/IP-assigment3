@@ -1,1 +1,16 @@
-The report will be done here
+/* Internet Programming 2015/2016
+*
+* Assignment 3
+* Authors:   Baris Can Vural,    Floris Turkenburg
+* VUNetID:   bvl250,             ftg600
+*
+* Date: 16 October 2015
+*/
+
+1.3
+Q-A: We can transfer any number of papers by sending them as a linked list.
+Q-B: Sun RPC needs to know how much memory to allocate for a data structure. We used opaque type to store data of arbitrary length and type.
+
+3.1 Questions
+Q-C: A thread per client server structure was used to implement HotelGateway. We used the synchronized keyword in the method definitions to avoid race conditions.
+Q-D: If the gateway is implemented to support FTP, sending and receiving files between the client and the gateway is possible.
