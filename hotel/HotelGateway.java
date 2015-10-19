@@ -59,7 +59,7 @@ public class HotelGateway {
                                         if (result < 0) {
                                             pw.println("NA");
                                         } else {
-                                            pw.println("Ok");
+                                            pw.println("ok");
                                         }
                                     }
                                 } else if (input.equals("q")) {
