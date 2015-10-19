@@ -22,7 +22,7 @@ public class HotelGateway {
             ServerSocket serverSocket = new ServerSocket(PORTNUM);
             while (true) {
                 final Socket clientSocket = serverSocket.accept();
-                final HotelInterface hotel = (HotelInterface) Naming.lookup("rmi://localhost/HotelService");
+                final HotelInterface hotel = (HotelInterface) Naming.lookup("rmi://"+args[0]+"/HotelService");
                 Runnable task = new Runnable() {
                     public void run() {
                         try {
